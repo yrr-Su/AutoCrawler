@@ -2,7 +2,7 @@ name: Crawler Demo Action
 
 on:
   schedule:
-    - cron: "55 2 * * *"  # 台灣時間 20:55
+    - cron: "47 2 * * *"  # 台灣時間 20:55
   workflow_dispatch:      # 允許手動測試
 
 jobs:
