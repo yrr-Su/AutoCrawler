@@ -2,7 +2,7 @@ name: Crawler Demo Action
 
 on:
   schedule:
-    - cron: "47 2 * * *"  # 台灣時間 20:55
+    - cron: "0 6 * * *"  # 台灣時間 20:55
   workflow_dispatch:      # 允許手動測試
 
 jobs:
@@ -24,7 +24,7 @@ jobs:
         run: pip3 install requests beautifulsoup4 # 依需求增加套件
 
       - name: Run crawler.py
-        run: python crawler.py
+        run: python cbas_crawler.py
 
       - name: Commit and Push Data
         run: |
