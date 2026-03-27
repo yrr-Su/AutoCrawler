@@ -14,14 +14,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-    
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.12"
 
       - name: Install Python Dependency
-        run: pip3 install requests beautifulsoup4 # 依需求增加套件
+        run: pip3 install requests beautifulsoup4
+
+      - name: Discord Webhook Action
+        uses: tsickert/discord-webhook@v7.0.0
+        with:
+          webhook-url: ${{ secrets.DC_WEBHOOK_URL }}
+          content: "Start crawling data for CBAS"
 
       - name: Run crawler.py
         run: python cbas_crawler.py
@@ -32,3 +38,9 @@ jobs:
           git config --global user.email "crawler-bot@gmail.com"
           git add . && git commit -m "daily crawl"
           git push origin main
+
+      - name: Discord Webhook Action
+        uses: tsickert/discord-webhook@v7.0.0
+        with:
+          webhook-url: ${{ secrets.DC_WEBHOOK_URL }}
+          content: "Finished crawling data for CBAS"
