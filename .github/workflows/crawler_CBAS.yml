@@ -27,10 +27,10 @@ jobs:
         uses: tsickert/discord-webhook@v7.0.0
         with:
           webhook-url: ${{ secrets.DC_WEBHOOK_URL }}
-          content: "Start crawling data for CBAS"
+          content: "Start crawling data for istock"
 
-      - name: Run crawler.py
-        run: python cbas_crawler.py
+      - name: Run istock_crawler.py
+        run: python istock_crawler.py
 
       - name: Commit and Push Data
         run: |
@@ -43,4 +43,4 @@ jobs:
         uses: tsickert/discord-webhook@v7.0.0
         with:
           webhook-url: ${{ secrets.DC_WEBHOOK_URL }}
-          content: "Finished crawling data for CBAS"
+          content: "Finished crawling data for istock"
