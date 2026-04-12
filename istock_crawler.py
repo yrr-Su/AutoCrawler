@@ -13,26 +13,32 @@ from tool import ensure_element_found
 def get_cbas_id_list() -> list[str]:
     """get CBAS id list from istock page"""
 
+    def _clean_id_text(text: str) -> str:
+        _cleaned_text = text.strip().split('-')[0].strip()
+        if _cleaned_text.isdigit():
+            return _cleaned_text
+        return ''
+
     session = requests.Session()
-    response = session.get('http://money-104.com/paper_get0D1_13.html')
+    response = session.get('http://money-104.com/paper_bookentry.php?')
     soup = bs4.BeautifulSoup(response.text, 'html.parser')
     id_list = []
 
-    thead_list = ensure_element_found(
-        soup.find_all('thead'),
-        describe="thead in istock page",
+    select_id = ensure_element_found(
+        soup.find('select', {'name': 'stock_id'}),
+        describe="select element for stock_id in istock page",
         msg="get_cbas_id_list in thefewCrawler")
 
-    for thead in thead_list[1::]:
+    option_list = ensure_element_found(
+        select_id.find_all('option'),
+        describe="all option element for stock_id in istock page",
+        msg="get_cbas_id_list in thefewCrawler")
 
-        td_data = ensure_element_found(
-            thead.find_all('td'),
-            describe="all td data for CBAS",
-            msg="get_cbas_id_list in thefewCrawler")
+    for option in option_list:
+        cleaned_id = _clean_id_text(option.text)
+        if cleaned_id:
+            id_list.append(cleaned_id)
 
-        id_list.append(td_data[3].text)
-
-    session.close()
     return id_list
 
 def istock_crawler() -> dict[str, float]:
@@ -86,6 +92,9 @@ def istock_crawler() -> dict[str, float]:
 if __name__ == "__main__":
 
     data = istock_crawler()
+
+    if len(data) == 0:
+        exit(1)
 
     json_data = {
         "last_update" : datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
