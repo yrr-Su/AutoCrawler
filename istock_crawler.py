@@ -69,8 +69,8 @@ def get_id_list_from_thefew() -> list[str]:
 
 
 id_list_function = {
-    'thefew': get_id_list_from_istock,
-    'istock': get_id_list_from_thefew
+    'thefew': get_id_list_from_thefew,
+    'istock': get_id_list_from_istock
     }
 
 def istock_crawler(
