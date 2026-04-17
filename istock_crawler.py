@@ -3,6 +3,7 @@ import json
 from datetime import datetime
 from math import nan
 from pathlib import Path
+from typing import Literal
 
 import bs4
 import requests
@@ -10,7 +11,7 @@ import requests
 from tool import ensure_element_found
 
 
-def get_cbas_id_list() -> list[str]:
+def get_id_list_from_istock() -> list[str]:
     """get CBAS id list from istock page"""
 
     def _clean_id_text(text: str) -> str:
@@ -41,10 +42,43 @@ def get_cbas_id_list() -> list[str]:
 
     return id_list
 
-def istock_crawler() -> dict[str, float]:
+def get_id_list_from_thefew() -> list[str]:
+    """get CBAS id list from thefew page"""
+
+    session = requests.Session()
+    response = session.get('https://thefew.tw/cb')
+    soup = bs4.BeautifulSoup(response.text, 'html.parser')
+    id_list = []
+
+    table = ensure_element_found(
+        soup.find('table', id="cb-table"),
+        describe="table element in thefew page",
+        msg="get_cbas_id_list in thefewCrawler")
+
+    div_id_list = ensure_element_found(
+        table.find_all('div', class_='inline-block w-1/3') ,
+        describe="all id element in thefew page",
+        msg="get_cbas_id_list in thefewCrawler")
+
+    for div_id in div_id_list:
+        id_text = div_id.text.strip()
+        if id_text.isdigit():
+            id_list.append(id_text)
+
+    return id_list
+
+
+id_list_function = {
+    'thefew': get_id_list_from_istock,
+    'istock': get_id_list_from_thefew
+    }
+
+def istock_crawler(
+        id_list_src: Literal['thefew', 'istock'] = 'thefew'
+        ) -> tuple[dict[str, float], str]:
     """crawl CBAS data from istock page"""
 
-    id_list = get_cbas_id_list()
+    id_list = id_list_function[id_list_src]()
 
     session = requests.Session()
     data = dict()
@@ -87,19 +121,19 @@ def istock_crawler() -> dict[str, float]:
             data[id] = nan
 
     session.close()
-    return data
+    return data, id_list_src
 
 if __name__ == "__main__":
 
-    data = istock_crawler()
-
+    data, id_list_src_nam = istock_crawler()
     if len(data) == 0:
         exit(1)
 
     json_data = {
         "last_update" : datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "id_list_src" : id_list_src_nam,
         "data" : data
-    }
+        }
 
     with open(Path('data') / 'istock.json', 'w') as f:
         json.dump(json_data, f, indent=4)
